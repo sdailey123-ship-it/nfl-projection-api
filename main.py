@@ -115,4 +115,27 @@ def search_player(name: str, season: int = 2024):
 
     data = response.json()
     return data
+@app.get("/teams")
+def get_teams():
+    api_key = os.getenv("API_SPORTS_KEY")
+
+    if not api_key:
+        return {"error": "API key not found"}
+
+    url = "https://v1.american-football.api-sports.io/teams"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "v1.american-football.api-sports.io"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        return {
+            "error": "API request failed",
+            "status": response.status_code,
+            "details": response.text
+        }
+
+    return response.json()
 
