@@ -128,7 +128,11 @@ def get_teams():
         "x-rapidapi-host": "v1.american-football.api-sports.io"
     }
 
-    response = requests.get(url, headers=headers)
+    params = {
+        "league": 1
+    }
+
+    response = requests.get(url, headers=headers, params=params)
 
     if response.status_code != 200:
         return {
@@ -138,4 +142,3 @@ def get_teams():
         }
 
     return response.json()
-
