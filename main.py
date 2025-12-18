@@ -143,4 +143,96 @@ def get_teams(season: int = 2024):
         }
 
     return response.json()
+@app.get("/player/{player_id}/rolling-stats")
+def get_player_rolling_stats(
+    player_id: int,
+    season: int = STATS_SEASON
+):
+    api_key = os.getenv("API_SPORTS_KEY")
+
+    if not api_key:
+        return {"error": "API key not found"}
+
+    url = "https://v1.american-football.api-sports.io/players/statistics"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "v1.american-football.api-sports.io"
+    }
+
+    params = {
+        "player": player_id,
+        "season": season
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code != 200:
+        return {
+            "error": "API request failed",
+            "status": response.status_code,
+            "details": response.text
+        }
+
+    data = response.json()
+    games = data.get("response", [])
+
+    if not games:
+        return {
+            "player_id": player_id,
+            "season": season,
+            "note": "No stats available"
+        }
+
+    def avg(values):
+        return round(sum(values) / len(values), 2) if values else 0
+
+    # Extract stats per game
+    recs = []
+    targets = []
+    rec_yards = []
+    pass_yards = []
+    pass_attempts = []
+
+    for g in games:
+        stats = g.get("statistics", {})
+
+        receiving = stats.get("receiving", {})
+        passing = stats.get("passing", {})
+
+        recs.append(receiving.get("receptions", 0))
+        targets.append(receiving.get("targets", 0))
+        rec_yards.append(receiving.get("yards", 0))
+
+        pass_yards.append(passing.get("yards", 0))
+        pass_attempts.append(passing.get("attempts", 0))
+
+    return {
+        "player_id": player_id,
+        "season": season,
+        "games_played": len(games),
+
+        "last_3": {
+            "receptions": avg(recs[:3]),
+            "targets": avg(targets[:3]),
+            "receiving_yards": avg(rec_yards[:3]),
+            "passing_yards": avg(pass_yards[:3]),
+            "passing_attempts": avg(pass_attempts[:3])
+        },
+
+        "last_5": {
+            "receptions": avg(recs[:5]),
+            "targets": avg(targets[:5]),
+            "receiving_yards": avg(rec_yards[:5]),
+            "passing_yards": avg(pass_yards[:5]),
+            "passing_attempts": avg(pass_attempts[:5])
+        },
+
+        "season_avg": {
+            "receptions": avg(recs),
+            "targets": avg(targets),
+            "receiving_yards": avg(rec_yards),
+            "passing_yards": avg(pass_yards),
+            "passing_attempts": avg(pass_attempts)
+        }
+    }
 
