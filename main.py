@@ -116,7 +116,7 @@ def search_player(name: str, season: int = 2024):
     data = response.json()
     return data
 @app.get("/teams")
-def get_teams():
+def get_teams(season: int = 2024):
     api_key = os.getenv("API_SPORTS_KEY")
 
     if not api_key:
@@ -129,7 +129,8 @@ def get_teams():
     }
 
     params = {
-        "league": 1
+        "league": 1,   # NFL
+        "season": season
     }
 
     response = requests.get(url, headers=headers, params=params)
@@ -142,3 +143,4 @@ def get_teams():
         }
 
     return response.json()
+
