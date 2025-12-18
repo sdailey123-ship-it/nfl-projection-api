@@ -76,3 +76,6 @@ def get_player_recent_games(player_id: int, games: int = 5):
         "games_returned": len(games_data),
         "games": games_data
     }
+@app.get("/ping")
+def ping():
+    return {"status": "ok"}
