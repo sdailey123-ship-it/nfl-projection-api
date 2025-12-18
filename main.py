@@ -30,7 +30,10 @@ def project_receptions(p: PlayerInput):
     L = math.floor(p.line)
     lam = rec_proj
 
-    poisson_cdf = sum(math.exp(-lam) * lam**k / math.factorial(k) for k in range(L+1))
+    poisson_cdf = sum(
+        math.exp(-lam) * lam**k / math.factorial(k)
+        for k in range(L + 1)
+    )
     prob_over = 1 - poisson_cdf
 
     return {
@@ -44,7 +47,6 @@ def get_player_recent_games(
     games: int = 5,
     season: int = 2024
 ):
-
     api_key = os.getenv("API_SPORTS_KEY")
 
     if not api_key:
@@ -56,12 +58,11 @@ def get_player_recent_games(
         "x-rapidapi-host": "v1.american-football.api-sports.io"
     }
 
-params = {
-    "player": player_id,
-    "season": season,
-    "league": 1
-}
-
+    params = {
+        "player": player_id,
+        "season": season,
+        "league": 1
+    }
 
     response = requests.get(url, headers=headers, params=params)
 
@@ -73,8 +74,6 @@ params = {
         }
 
     data = response.json()
-
-    # Return only the most recent N games
     games_data = data.get("response", [])[:games]
 
     return {
@@ -82,6 +81,7 @@ params = {
         "games_returned": len(games_data),
         "games": games_data
     }
+
 @app.get("/ping")
 def ping():
     return {"status": "ok"}
