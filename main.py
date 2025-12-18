@@ -238,4 +238,78 @@ def get_player_rolling_stats(
             "passing_attempts": avg(pass_attempts)
         }
     }
+    @app.get("/project/player/{player_id}")
+def project_player_props(
+    player_id: int,
+    season: int = STATS_SEASON
+):
+    api_key = os.getenv("API_SPORTS_KEY")
+
+    url = "https://v1.american-football.api-sports.io/players/statistics"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "v1.american-football.api-sports.io"
+    }
+
+    params = {
+        "player": player_id,
+        "season": season
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+    data = response.json()
+    games = data.get("response", [])
+
+    if not games:
+        return {"error": "No stats available"}
+
+    def avg(values):
+        return sum(values) / len(values) if values else 0
+
+    # Extract per-game stats
+    recs, yards, pass_yards = [], [], []
+
+    for g in games:
+        stats = g.get("statistics", {})
+        receiving = stats.get("receiving", {})
+        passing = stats.get("passing", {})
+
+        recs.append(receiving.get("receptions", 0))
+        yards.append(receiving.get("yards", 0))
+        pass_yards.append(passing.get("yards", 0))
+
+    last3 = slice(0, 3)
+    last5 = slice(0, 5)
+
+    # Receptions projection
+    rec_proj = (
+        avg(recs[last3]) * 0.45 +
+        avg(recs[last5]) * 0.25 +
+        avg(recs) * 0.30
+    )
+
+    # Receiving yards projection
+    rec_yards_proj = (
+        avg(yards[last3]) * 0.40 +
+        avg(yards[last5]) * 0.30 +
+        avg(yards) * 0.30
+    )
+
+    # Passing yards projection
+    pass_yards_proj = (
+        avg(pass_yards[last3]) * 0.35 +
+        avg(pass_yards[last5]) * 0.35 +
+        avg(pass_yards) * 0.30
+    )
+
+    return {
+        "player_id": player_id,
+        "season": season,
+        "projections": {
+            "receptions": round(rec_proj, 2),
+            "receiving_yards": round(rec_yards_proj, 1),
+            "passing_yards": round(pass_yards_proj, 1)
+        }
+    }
+
 
