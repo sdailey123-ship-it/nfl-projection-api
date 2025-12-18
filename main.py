@@ -35,3 +35,44 @@ def project_receptions(p: PlayerInput):
         "projection": round(rec_proj, 2),
         "over_probability": round(prob_over, 3)
     }
+import requests
+import os
+
+@app.get("/player/{player_id}/recent-games")
+def get_player_recent_games(player_id: int, games: int = 5):
+    api_key = os.getenv("API_SPORTS_KEY")
+
+    if not api_key:
+        return {"error": "API key not found"}
+
+    url = "https://v1.american-football.api-sports.io/players/statistics"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "v1.american-football.api-sports.io"
+    }
+
+    params = {
+        "player": player_id,
+        "season": 2023,   # change later
+        "league": 1       # NFL
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code != 200:
+        return {
+            "error": "API request failed",
+            "status": response.status_code,
+            "details": response.text
+        }
+
+    data = response.json()
+
+    # Return only the most recent N games
+    games_data = data.get("response", [])[:games]
+
+    return {
+        "player_id": player_id,
+        "games_returned": len(games_data),
+        "games": games_data
+    }
