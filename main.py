@@ -4,7 +4,6 @@ import math
 import requests
 import os
 
-
 app = FastAPI()
 
 class PlayerInput(BaseModel):
@@ -53,7 +52,7 @@ def get_player_recent_games(player_id: int, games: int = 5):
     }
 
     params = {
-        "player": player_id,
+        "player": 313,
         "season": 2023,   # change later
         "league": 1       # NFL
     }
