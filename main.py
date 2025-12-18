@@ -39,7 +39,12 @@ def project_receptions(p: PlayerInput):
     }
 
 @app.get("/player/{player_id}/recent-games")
-def get_player_recent_games(player_id: int, games: int = 5):
+def get_player_recent_games(
+    player_id: int,
+    games: int = 5,
+    season: int = 2024
+):
+
     api_key = os.getenv("API_SPORTS_KEY")
 
     if not api_key:
@@ -51,11 +56,12 @@ def get_player_recent_games(player_id: int, games: int = 5):
         "x-rapidapi-host": "v1.american-football.api-sports.io"
     }
 
-    params = {
-        "player": 313,
-        "season": 2023,   # change later
-        "league": 1       # NFL
-    }
+params = {
+    "player": player_id,
+    "season": season,
+    "league": 1
+}
+
 
     response = requests.get(url, headers=headers, params=params)
 
