@@ -4,6 +4,9 @@ import math
 import requests
 import os
 
+STATS_SEASON = 2025
+TEAM_SEASON = 2024
+
 app = FastAPI()
 
 class PlayerInput(BaseModel):
