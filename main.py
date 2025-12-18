@@ -85,3 +85,34 @@ def get_player_recent_games(
 @app.get("/ping")
 def ping():
     return {"status": "ok"}
+@app.get("/search/player")
+def search_player(name: str, season: int = 2024):
+    api_key = os.getenv("API_SPORTS_KEY")
+
+    if not api_key:
+        return {"error": "API key not found"}
+
+    url = "https://v1.american-football.api-sports.io/players"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "v1.american-football.api-sports.io"
+    }
+
+    params = {
+        "search": name,
+        "season": season,
+        "league": 1
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code != 200:
+        return {
+            "error": "API request failed",
+            "status": response.status_code,
+            "details": response.text
+        }
+
+    data = response.json()
+    return data
+
