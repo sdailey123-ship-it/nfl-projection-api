@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import math
+import requests
+import os
+
 
 app = FastAPI()
 
@@ -35,8 +38,6 @@ def project_receptions(p: PlayerInput):
         "projection": round(rec_proj, 2),
         "over_probability": round(prob_over, 3)
     }
-import requests
-import os
 
 @app.get("/player/{player_id}/recent-games")
 def get_player_recent_games(player_id: int, games: int = 5):
